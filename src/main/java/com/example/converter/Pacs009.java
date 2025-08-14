@@ -81,6 +81,7 @@ public class Pacs009 {
         private Date interbankSettlementDate;
         private Party instructingAgent;
         private Party instructedAgent;
+        private String senderToReceiverInformation;
 
         public PaymentIdentification getPaymentIdentification() {
             return paymentIdentification;
@@ -120,6 +121,14 @@ public class Pacs009 {
 
         public void setInstructedAgent(Party instructedAgent) {
             this.instructedAgent = instructedAgent;
+        }
+
+        public String getSenderToReceiverInformation() {
+            return senderToReceiverInformation;
+        }
+
+        public void setSenderToReceiverInformation(String senderToReceiverInformation) {
+            this.senderToReceiverInformation = senderToReceiverInformation;
         }
     }
 

@@ -11,95 +11,24 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
-import java.math.BigDecimal;
-import java.text.ParseException;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MT202ToPacs009Converter implements Converter {
 
     private final Configuration configuration;
+    private final MT202Parser mt202Parser;
 
     public MT202ToPacs009Converter(Configuration configuration) {
         this.configuration = configuration;
+        this.mt202Parser = new MT202Parser();
     }
 
     @Override
     public String convert(String mt202Message) {
-        com.example.converter.MT202 mt202 = parseMt202(mt202Message);
+        MT202 mt202 = mt202Parser.parse(mt202Message);
         Pacs009 pacs009 = mapToPacs009(mt202);
         return generatePacs009(pacs009);
-    }
-
-    private com.example.converter.MT202 parseMt202(String mt202Message) {
-        com.example.converter.MT202 mt202 = new com.example.converter.MT202();
-
-        mt202.setTransactionReferenceNumber(getTagValue(mt202Message, "20"));
-        mt202.setRelatedReference(getTagValue(mt202Message, "21"));
-
-        String field32AValue = getTagValue(mt202Message, "32A");
-        if (field32AValue != null) {
-            try {
-                Date date = new SimpleDateFormat("yyMMdd").parse(field32AValue.substring(0, 6));
-                mt202.setValueDate(date);
-                mt202.setCurrency(field32AValue.substring(6, 9));
-                mt202.setAmount(new BigDecimal(field32AValue.substring(9).replace(",", ".")));
-            } catch (ParseException e) {
-                // Handle exception
-            }
-        }
-
-        mt202.setOrderingInstitution(parseParty(mt202Message, "52"));
-        mt202.setBeneficiaryInstitution(parseParty(mt202Message, "58"));
-
-        mt202.setSenderToReceiverInformation(getTagValue(mt202Message, "72"));
-
-        return mt202;
-    }
-
-    private com.example.converter.MT202.Party parseParty(String mt202Message, String tag) {
-        String tagAValue = getTagValue(mt202Message, tag + "A");
-        if (tagAValue != null) {
-            com.example.converter.MT202.Party party = new com.example.converter.MT202.Party();
-            String[] parts = tagAValue.split("/");
-            party.setBic(parts[0]);
-            if (parts.length > 1) {
-                party.setAccountNumber(parts[1]);
-            }
-            return party;
-        }
-
-        String tagDValue = getTagValue(mt202Message, tag + "D");
-        if (tagDValue != null) {
-            com.example.converter.MT202.Party party = new com.example.converter.MT202.Party();
-            String[] lines = tagDValue.split("\\n");
-            party.setNameAndAddress(lines[0]);
-            if (lines.length > 1) {
-                party.setAccountNumber(lines[1]);
-            }
-            return party;
-        }
-
-        return null;
-    }
-
-    private String getTagValue(String message, String tag) {
-        // DOTALL flag (?s) allows . to match newline characters.
-        Pattern pattern = Pattern.compile("(?s):" + tag + ":(.*?)\\n:");
-        Matcher matcher = pattern.matcher(message);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        }
-
-        pattern = Pattern.compile("(?s):" + tag + ":(.*?)\\n-}");
-        matcher = pattern.matcher(message);
-        if (matcher.find()) {
-            return matcher.group(1).trim();
-        }
-
-        return null;
     }
 
 

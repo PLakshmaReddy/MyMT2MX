@@ -1,0 +1,28 @@
+<Document>
+    <GrpHdr>
+        <MsgId>MSGID123</MsgId>
+        <CreDtTm>2024-08-14T10:00:00</CreDtTm>
+        <NbOfTxs>1</NbOfTxs>
+        <SttlmInf>
+            <SttlmMtd>INDA</SttlmMtd>
+        </SttlmInf>
+    </GrpHdr>
+    <FinInstnCdtTrf>
+        <PmtId>
+            <InstrId>TXREF12345</InstrId>
+            <EndToEndId>RELREF67890</EndToEndId>
+        </PmtId>
+        <IntrBkSttlmAmt Ccy="USD">12345.67</IntrBkSttlmAmt>
+        <IntrBkSttlmDt>2024-08-14</IntrBkSttlmDt>
+        <InstgAgt>
+            <FinInstnId>
+                <BICFI>BANKUS33</BICFI>
+            </FinInstnId>
+        </InstgAgt>
+        <InstdAgt>
+            <FinInstnId>
+                <BICFI>BANKGB2L</BICFI>
+            </FinInstnId>
+        </InstdAgt>
+    </FinInstnCdtTrf>
+</Document>
