@@ -250,4 +250,54 @@ class MessageComparatorTest {
 
         assertFalse(result.hasDifferences());
     }
+
+    @Test
+    void testCompare_withDataSourceScheme() throws IOException, JDOMException, ParseException {
+        File mtFile = tempDir.resolve("test_dss.mt202").toFile();
+        Files.write(mtFile.toPath(), (
+                ":20:TXREF-DSS\n" +
+                ":21:RELREF-DSS\n" +
+                ":32A:240819EUR9999\n" +
+                ":53D:/DSS/NAT/1234\n" +
+                "TEST BANK DSS\n" +
+                "TEST ADDRESS DSS\n" +
+                ":58A:BANKDEFF\n"
+        ).getBytes());
+
+        File pacsFile = tempDir.resolve("test_dss.pacs009").toFile();
+        Files.write(pacsFile.toPath(), (
+                "<Document>\n" +
+                "    <GrpHdr>\n" +
+                "        <MsgId>MSGID-DSS</MsgId>\n" +
+                "        <CreDtTm>2024-08-19T15:00:00</CreDtTm>\n" +
+                "        <NbOfTxs>1</NbOfTxs>\n" +
+                "    </GrpHdr>\n" +
+                "    <FinInstnCdtTrf>\n" +
+                "        <PmtId>\n" +
+                "            <InstrId>TXREF-DSS</InstrId>\n" +
+                "            <EndToEndId>RELREF-DSS</EndToEndId>\n" +
+                "        </PmtId>\n" +
+                "        <IntrBkSttlmAmt Ccy=\"EUR\">9999</IntrBkSttlmAmt>\n" +
+                "        <IntrBkSttlmDt>2024-08-19</IntrBkSttlmDt>\n" +
+                "        <IntrmyAgt1>\n" +
+                "            <FinInstnId>\n" +
+                "                <Nm>TEST BANK DSS</Nm>\n" +
+                "                <PstlAdr>\n" +
+                "                    <AdrLine>TEST ADDRESS DSS</AdrLine>\n" +
+                "                </PstlAdr>\n" +
+                "                <Othr>\n" +
+                "                    <SchmeNm><Cd>NAT</Cd></SchmeNm>\n" +
+                "                </Othr>\n" +
+                "            </FinInstnId>\n" +
+                "        </IntrmyAgt1>\n" +
+                "        <InstdAgt><FinInstnId><BICFI>BANKDEFF</BICFI></FinInstnId></InstdAgt>\n" +
+                "    </FinInstnCdtTrf>\n" +
+                "</Document>"
+        ).getBytes());
+
+        MessageComparator comparator = new MessageComparator();
+        ComparisonResult result = comparator.compare(mtFile, pacsFile);
+
+        assertFalse(result.hasDifferences());
+    }
 }

@@ -73,6 +73,10 @@ public class MessageComparator {
             }
             compareAndAddDifference(result, partyName + " Name & Address", mtParty.getNameAndAddress(), pacsNameAndAddress);
         }
+
+        if (mtParty.getDataSourceScheme() != null) {
+            compareAndAddDifference(result, partyName + " Data Source Scheme", mtParty.getDataSourceScheme(), pacsParty.getDataSourceScheme());
+        }
     }
 
     private void compareAndAddDifference(ComparisonResult result, String fieldName, String mtValue, String pacsValue) {

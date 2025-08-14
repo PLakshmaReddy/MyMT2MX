@@ -206,6 +206,7 @@ public class Pacs009 {
         private String address;
         private String bic;
         private String accountNumber;
+        private String dataSourceScheme;
 
         public String getName() {
             return name;
@@ -237,6 +238,14 @@ public class Pacs009 {
 
         public void setAccountNumber(String accountNumber) {
             this.accountNumber = accountNumber;
+        }
+
+        public String getDataSourceScheme() {
+            return dataSourceScheme;
+        }
+
+        public void setDataSourceScheme(String dataSourceScheme) {
+            this.dataSourceScheme = dataSourceScheme;
         }
     }
 }

@@ -100,6 +100,13 @@ public class Pacs009Parser {
             if (pstlAdr != null) {
                 party.setAddress(pstlAdr.getChildText("AdrLine", pstlAdr.getNamespace()));
             }
+            Element othr = finInstnId.getChild("Othr", finInstnId.getNamespace());
+            if (othr != null) {
+                Element schmeNm = othr.getChild("SchmeNm", othr.getNamespace());
+                if (schmeNm != null) {
+                    party.setDataSourceScheme(schmeNm.getChildText("Cd", schmeNm.getNamespace()));
+                }
+            }
         }
         return party;
     }

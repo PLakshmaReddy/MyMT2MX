@@ -26,6 +26,7 @@ public class MT202 {
         private String bic;
         private String accountNumber;
         private String nameAndAddress;
+        private String dataSourceScheme;
 
         public String getBic() {
             return bic;
@@ -49,6 +50,14 @@ public class MT202 {
 
         public void setNameAndAddress(String nameAndAddress) {
             this.nameAndAddress = nameAndAddress;
+        }
+
+        public String getDataSourceScheme() {
+            return dataSourceScheme;
+        }
+
+        public void setDataSourceScheme(String dataSourceScheme) {
+            this.dataSourceScheme = dataSourceScheme;
         }
     }
 

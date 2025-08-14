@@ -63,7 +63,14 @@ public class MT202Parser {
             String[] lines = tagDValue.split("\\n");
             int nameAndAddressStartIndex = 0;
             if (lines.length > 0 && lines[0].startsWith("/")) {
-                party.setAccountNumber(lines[0].substring(1));
+                if (lines[0].startsWith("/DSS/")) {
+                    String[] dssParts = lines[0].split("/");
+                    if (dssParts.length > 2) {
+                        party.setDataSourceScheme(dssParts[2]);
+                    }
+                } else {
+                    party.setAccountNumber(lines[0].substring(1));
+                }
                 nameAndAddressStartIndex = 1;
             }
             StringBuilder nameAndAddress = new StringBuilder();
