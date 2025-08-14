@@ -43,10 +43,16 @@ public class MT202Parser {
         String tagAValue = getTagValue(mt202Message, tag + "A");
         if (tagAValue != null) {
             MT202.Party party = new MT202.Party();
-            String[] parts = tagAValue.split("/");
-            party.setBic(parts[0]);
-            if (parts.length > 1) {
-                party.setAccountNumber(parts[1]);
+            String[] lines = tagAValue.split("\\n");
+            if (lines.length > 0) {
+                if (lines[0].startsWith("/")) {
+                    party.setAccountNumber(lines[0].substring(1));
+                    if (lines.length > 1) {
+                        party.setBic(lines[1]);
+                    }
+                } else {
+                    party.setBic(lines[0]);
+                }
             }
             return party;
         }
@@ -56,7 +62,7 @@ public class MT202Parser {
             MT202.Party party = new MT202.Party();
             String[] lines = tagDValue.split("\\n");
             int nameAndAddressStartIndex = 0;
-            if (lines[0].startsWith("/")) {
+            if (lines.length > 0 && lines[0].startsWith("/")) {
                 party.setAccountNumber(lines[0].substring(1));
                 nameAndAddressStartIndex = 1;
             }

@@ -209,4 +209,45 @@ class MessageComparatorTest {
 
         assertFalse(result.hasDifferences());
     }
+
+    @Test
+    void testCompare_withA_option_accountAndBic() throws IOException, JDOMException, ParseException {
+        File mtFile = tempDir.resolve("test_a_option.mt202").toFile();
+        Files.write(mtFile.toPath(), (
+                ":20:TXREF-A-OPT\n" +
+                ":21:RELREF-A-OPT\n" +
+                ":32A:240819USD5000\n" +
+                ":52A:/987654\n" +
+                "BANKUS33\n" +
+                ":58A:BANKGB2L\n"
+        ).getBytes());
+
+        File pacsFile = tempDir.resolve("test_a_option.pacs009").toFile();
+        Files.write(pacsFile.toPath(), (
+                "<Document>\n" +
+                "    <GrpHdr>\n" +
+                "        <MsgId>MSGID-A-OPT</MsgId>\n" +
+                "        <CreDtTm>2024-08-19T14:00:00</CreDtTm>\n" +
+                "        <NbOfTxs>1</NbOfTxs>\n" +
+                "    </GrpHdr>\n" +
+                "    <FinInstnCdtTrf>\n" +
+                "        <PmtId>\n" +
+                "            <InstrId>TXREF-A-OPT</InstrId>\n" +
+                "            <EndToEndId>RELREF-A-OPT</EndToEndId>\n" +
+                "        </PmtId>\n" +
+                "        <IntrBkSttlmAmt Ccy=\"USD\">5000</IntrBkSttlmAmt>\n" +
+                "        <IntrBkSttlmDt>2024-08-19</IntrBkSttlmDt>\n" +
+                "        <InstgAgt>\n" +
+                "           <FinInstnId><BICFI>BANKUS33</BICFI></FinInstnId>\n" +
+                "        </InstgAgt>\n" +
+                "        <InstdAgt><FinInstnId><BICFI>BANKGB2L</BICFI></FinInstnId></InstdAgt>\n" +
+                "    </FinInstnCdtTrf>\n" +
+                "</Document>"
+        ).getBytes());
+
+        MessageComparator comparator = new MessageComparator();
+        ComparisonResult result = comparator.compare(mtFile, pacsFile);
+
+        assertFalse(result.hasDifferences());
+    }
 }
