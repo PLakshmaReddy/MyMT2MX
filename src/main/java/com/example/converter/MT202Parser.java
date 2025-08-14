@@ -55,10 +55,19 @@ public class MT202Parser {
         if (tagDValue != null) {
             MT202.Party party = new MT202.Party();
             String[] lines = tagDValue.split("\\n");
-            party.setNameAndAddress(lines[0]);
-            if (lines.length > 1) {
-                party.setAccountNumber(lines[1]);
+            int nameAndAddressStartIndex = 0;
+            if (lines[0].startsWith("/")) {
+                party.setAccountNumber(lines[0].substring(1));
+                nameAndAddressStartIndex = 1;
             }
+            StringBuilder nameAndAddress = new StringBuilder();
+            for (int i = nameAndAddressStartIndex; i < lines.length; i++) {
+                nameAndAddress.append(lines[i]);
+                if (i < lines.length - 1) {
+                    nameAndAddress.append("\n");
+                }
+            }
+            party.setNameAndAddress(nameAndAddress.toString());
             return party;
         }
 

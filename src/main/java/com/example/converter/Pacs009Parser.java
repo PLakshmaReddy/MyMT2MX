@@ -95,8 +95,12 @@ public class Pacs009Parser {
         Element finInstnId = partyElement.getChild("FinInstnId", partyElement.getNamespace());
         if (finInstnId != null) {
             party.setBic(finInstnId.getChildText("BICFI", finInstnId.getNamespace()));
+            party.setName(finInstnId.getChildText("Nm", finInstnId.getNamespace()));
+            Element pstlAdr = finInstnId.getChild("PstlAdr", finInstnId.getNamespace());
+            if (pstlAdr != null) {
+                party.setAddress(pstlAdr.getChildText("AdrLine", pstlAdr.getNamespace()));
+            }
         }
-        party.setName(party.getBic()); // for now, we assume name and bic are the same
         return party;
     }
 }

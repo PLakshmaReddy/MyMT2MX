@@ -46,35 +46,33 @@ public class MessageComparator {
         // Compare Currency
         compareAndAddDifference(result, "Currency", mt202.getCurrency(), pacs009.getFinancialInstitutionCreditTransfer().getInterbankSettlementAmount().getCurrency());
 
-        // Compare Ordering Institution
-        if(mt202.getOrderingInstitution() != null && pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent() != null)
-        {
-            compareAndAddDifference(result, "Ordering Institution BIC", mt202.getOrderingInstitution().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent().getBic());
-        }
-
-
-        // Compare Beneficiary Institution
-        if(mt202.getBeneficiaryInstitution() != null && pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent() != null)
-        {
-            compareAndAddDifference(result, "Beneficiary Institution BIC", mt202.getBeneficiaryInstitution().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getBic());
-        }
-
-        // Compare Intermediary Agents
-        if (mt202.getIntermediaryInstitution1() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent1() != null) {
-            compareAndAddDifference(result, "Intermediary Agent 1 BIC", mt202.getIntermediaryInstitution1().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent1().getBic());
-        }
-        if (mt202.getIntermediaryInstitution2() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent2() != null) {
-            compareAndAddDifference(result, "Intermediary Agent 2 BIC", mt202.getIntermediaryInstitution2().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent2().getBic());
-        }
-        if (mt202.getReceivingAgent() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent3() != null) {
-            compareAndAddDifference(result, "Receiving Agent BIC", mt202.getReceivingAgent().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent3().getBic());
-        }
-
+        // Compare Parties
+        compareParty(result, "Ordering Institution", mt202.getOrderingInstitution(), pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent());
+        compareParty(result, "Intermediary Agent 1", mt202.getIntermediaryInstitution1(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent1());
+        compareParty(result, "Intermediary Agent 2", mt202.getIntermediaryInstitution2(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent2());
+        compareParty(result, "Receiving Agent", mt202.getReceivingAgent(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent3());
+        compareParty(result, "Beneficiary Institution", mt202.getBeneficiaryInstitution(), pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent());
 
         // Compare Sender to Receiver Information
         compareAndAddDifference(result, "Sender to Receiver Information", mt202.getSenderToReceiverInformation(), pacs009.getFinancialInstitutionCreditTransfer().getSenderToReceiverInformation());
 
         return result;
+    }
+
+    private void compareParty(ComparisonResult result, String partyName, MT202.Party mtParty, Pacs009.Party pacsParty) {
+        if (mtParty == null || pacsParty == null) {
+            return;
+        }
+
+        if (mtParty.getBic() != null) {
+            compareAndAddDifference(result, partyName + " BIC", mtParty.getBic(), pacsParty.getBic());
+        } else if (mtParty.getNameAndAddress() != null) {
+            String pacsNameAndAddress = pacsParty.getName();
+            if (pacsParty.getAddress() != null) {
+                pacsNameAndAddress += "\n" + pacsParty.getAddress();
+            }
+            compareAndAddDifference(result, partyName + " Name & Address", mtParty.getNameAndAddress(), pacsNameAndAddress);
+        }
     }
 
     private void compareAndAddDifference(ComparisonResult result, String fieldName, String mtValue, String pacsValue) {

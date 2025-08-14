@@ -116,4 +116,97 @@ class MessageComparatorTest {
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Sender to Receiver Information")));
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Intermediary Agent 1 BIC")));
     }
+
+    @Test
+    void testCompare_complexCase() throws IOException, JDOMException, ParseException {
+        File mtFile = tempDir.resolve("transaction2.mt202").toFile();
+        Files.write(mtFile.toPath(), (
+                ":20:TXREF-COMPLEX\n" +
+                ":21:RELREF-COMPLEX\n" +
+                ":32A:240817CAD54321.98\n" +
+                ":52A:BANKCATT\n" +
+                ":56A:BANKDEFF\n" +
+                ":57A:BANKNL2A\n" +
+                ":58A:BANKGB2L\n" +
+                ":72:/INFO/complex case\n"
+        ).getBytes());
+
+        File pacsFile = tempDir.resolve("transaction2.pacs009").toFile();
+        Files.write(pacsFile.toPath(), (
+                "<Document>\n" +
+                "    <GrpHdr>\n" +
+                "        <MsgId>MSGID-COMPLEX</MsgId>\n" +
+                "        <CreDtTm>2024-08-17T12:00:00</CreDtTm>\n" +
+                "        <NbOfTxs>1</NbOfTxs>\n" +
+                "        <SttlmInf>\n" +
+                "            <SttlmMtd>INDA</SttlmMtd>\n" +
+                "        </SttlmInf>\n" +
+                "    </GrpHdr>\n" +
+                "    <FinInstnCdtTrf>\n" +
+                "        <PmtId>\n" +
+                "            <InstrId>TXREF-COMPLEX</InstrId>\n" +
+                "            <EndToEndId>RELREF-COMPLEX</EndToEndId>\n" +
+                "        </PmtId>\n" +
+                "        <IntrBkSttlmAmt Ccy=\"CAD\">54321.98</IntrBkSttlmAmt>\n" +
+                "        <IntrBkSttlmDt>2024-08-17</IntrBkSttlmDt>\n" +
+                "        <InstgAgt><FinInstnId><BICFI>BANKCATT</BICFI></FinInstnId></InstgAgt>\n" +
+                "        <IntrmyAgt3><FinInstnId><BICFI>BANKDEFF</BICFI></FinInstnId></IntrmyAgt3>\n" +
+                "        <InstdAgt><FinInstnId><BICFI>BANKGB2L</BICFI></FinInstnId></InstdAgt>\n" +
+                "        <Ustrd>/INFO/complex case</Ustrd>\n" +
+                "    </FinInstnCdtTrf>\n" +
+                "</Document>"
+        ).getBytes());
+
+        MessageComparator comparator = new MessageComparator();
+        ComparisonResult result = comparator.compare(mtFile, pacsFile);
+
+        assertFalse(result.hasDifferences());
+    }
+
+    @Test
+    void testCompare_withD_option() throws IOException, JDOMException, ParseException {
+        File mtFile = tempDir.resolve("test_d_option.mt202").toFile();
+        Files.write(mtFile.toPath(), (
+                ":20:TXREF-D-OPT\n" +
+                ":21:RELREF-D-OPT\n" +
+                ":32A:240818JPY100000\n" +
+                ":53D:/12345\n" +
+                "TEST BANK\n" +
+                "TEST ADDRESS\n" +
+                ":58A:BANKJPJT\n"
+        ).getBytes());
+
+        File pacsFile = tempDir.resolve("test_d_option.pacs009").toFile();
+        Files.write(pacsFile.toPath(), (
+                "<Document>\n" +
+                "    <GrpHdr>\n" +
+                "        <MsgId>MSGID-D-OPT</MsgId>\n" +
+                "        <CreDtTm>2024-08-18T13:00:00</CreDtTm>\n" +
+                "        <NbOfTxs>1</NbOfTxs>\n" +
+                "    </GrpHdr>\n" +
+                "    <FinInstnCdtTrf>\n" +
+                "        <PmtId>\n" +
+                "            <InstrId>TXREF-D-OPT</InstrId>\n" +
+                "            <EndToEndId>RELREF-D-OPT</EndToEndId>\n" +
+                "        </PmtId>\n" +
+                "        <IntrBkSttlmAmt Ccy=\"JPY\">100000</IntrBkSttlmAmt>\n" +
+                "        <IntrBkSttlmDt>2024-08-18</IntrBkSttlmDt>\n" +
+                "        <IntrmyAgt1>\n" +
+                "            <FinInstnId>\n" +
+                "                <Nm>TEST BANK</Nm>\n" +
+                "                <PstlAdr>\n" +
+                "                    <AdrLine>TEST ADDRESS</AdrLine>\n" +
+                "                </PstlAdr>\n" +
+                "            </FinInstnId>\n" +
+                "        </IntrmyAgt1>\n" +
+                "        <InstdAgt><FinInstnId><BICFI>BANKJPJT</BICFI></FinInstnId></InstdAgt>\n" +
+                "    </FinInstnCdtTrf>\n" +
+                "</Document>"
+        ).getBytes());
+
+        MessageComparator comparator = new MessageComparator();
+        ComparisonResult result = comparator.compare(mtFile, pacsFile);
+
+        assertFalse(result.hasDifferences());
+    }
 }

@@ -1,0 +1,22 @@
+<Document>
+    <GrpHdr>
+        <MsgId>MSGID-COMPLEX</MsgId>
+        <CreDtTm>2024-08-17T12:00:00</CreDtTm>
+        <NbOfTxs>1</NbOfTxs>
+        <SttlmInf>
+            <SttlmMtd>INDA</SttlmMtd>
+        </SttlmInf>
+    </GrpHdr>
+    <FinInstnCdtTrf>
+        <PmtId>
+            <InstrId>TXREF-COMPLEX</InstrId>
+            <EndToEndId>RELREF-COMPLEX</EndToEndId>
+        </PmtId>
+        <IntrBkSttlmAmt Ccy="CAD">54321.98</IntrBkSttlmAmt>
+        <IntrBkSttlmDt>2024-08-17</IntrBkSttlmDt>
+        <InstgAgt><FinInstnId><BICFI>BANKCATT</BICFI></FinInstnId></InstgAgt>
+        <IntrmyAgt3><FinInstnId><BICFI>BANKDEFF</BICFI></FinInstnId></IntrmyAgt3>
+        <InstdAgt><FinInstnId><BICFI>BANKGB2L</BICFI></FinInstnId></InstdAgt>
+        <Ustrd>/INFO/complex case</Ustrd>
+    </FinInstnCdtTrf>
+</Document>
