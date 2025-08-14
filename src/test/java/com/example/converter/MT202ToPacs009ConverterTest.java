@@ -4,6 +4,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MT202ToPacs009ConverterTest {
 
@@ -13,10 +16,13 @@ public class MT202ToPacs009ConverterTest {
                 ":20:REFERENCE\n" +
                 ":21:RELATEDREF\n" +
                 ":32A:240813USD1234,56\n" +
-                ":52D:ORDERINGBANK\n" +
-                "ACCOUNT 12345\n" +
-                "NEW YORK US\n" +
+                ":52A:ORDERINGBANK\n" +
+                ":53A:SENDERSCORR\n" +
+                ":54A:RECEIVERSCORR\n" +
+                ":56A:INTERMEDIARY\n" +
+                ":57A:ACCOUNTWITHBANK\n" +
                 ":58A:BENEFICIARYBANK\n" +
+                ":72:REMITTANCE INFO\n" +
                 "-}{5:{CHK:0123456789AB}}";
 
         Converter converter = new MT202ToPacs009Converter(new Configuration());
@@ -33,10 +39,33 @@ public class MT202ToPacs009ConverterTest {
         assertTrue(pacs009Message.contains("<InstrId>REFERENCE</InstrId>"));
         assertTrue(pacs009Message.contains("<EndToEndId>RELATEDREF</EndToEndId>"));
         assertTrue(pacs009Message.contains("<IntrBkSttlmAmt Ccy=\"USD\">1234.56</IntrBkSttlmAmt>"));
-        assertTrue(pacs009Message.contains("<IntrBkSttlmDt>2024-08-13</IntrBkSttlmDt>"));
-        assertTrue(pacs009Message.contains("<InstgAgt>"));
-        assertTrue(pacs009Message.contains("<InstdAgt>"));
-        assertTrue(pacs009Message.contains("<Nm>ORDERINGBANK</Nm>"));
-        assertTrue("The pacs.009 message should contain the beneficiary name.", pacs009Message.contains("<Nm>BENEFICIARYBANK</Nm>"));
+
+        Pattern pattern = Pattern.compile("<IntrBkSttlmDt>(.*?)</IntrBkSttlmDt>");
+        Matcher matcher = pattern.matcher(pacs009Message);
+        assertTrue(matcher.find());
+        assertEquals("2024-08-13", matcher.group(1));
+
+        assertTag(pacs009Message, "InstgAgt", "ORDERINGBANK");
+        assertTag(pacs009Message, "InstdAgt", "BENEFICIARYBANK");
+        assertTag(pacs009Message, "SndrsCorr", "SENDERSCORR");
+        assertTag(pacs009Message, "RcvrsCorr", "RECEIVERSCORR");
+        assertTag(pacs009Message, "IntrmyAgt1", "INTERMEDIARY");
+
+        Pattern rmtInfPattern = Pattern.compile("<RmtInf><Ustrd>(.*?)</Ustrd></RmtInf>");
+        Matcher rmtInfMatcher = rmtInfPattern.matcher(pacs009Message.replaceAll("\\s", ""));
+        assertTrue("Remittance Information not found", rmtInfMatcher.find());
+        assertEquals("REMITTANCEINFO", rmtInfMatcher.group(1));
+
+        Pattern instrForNxtAgtPattern = Pattern.compile("<InstrForNxtAgt><InstrInf>(.*?)</InstrInf></InstrForNxtAgt>");
+        Matcher instrForNxtAgtMatcher = instrForNxtAgtPattern.matcher(pacs009Message.replaceAll("\\s", ""));
+        assertTrue("Instruction For Next Agent not found", instrForNxtAgtMatcher.find());
+        assertEquals("ACCOUNTWITHBANK", instrForNxtAgtMatcher.group(1));
+    }
+
+    private void assertTag(String xml, String tagName, String expectedValue) {
+        Pattern pattern = Pattern.compile("<" + tagName + "><FinInstnId><BICFI>(.*?)</BICFI></FinInstnId></" + tagName + ">");
+        Matcher matcher = pattern.matcher(xml.replaceAll("\\s", ""));
+        assertTrue("Tag " + tagName + " not found", matcher.find());
+        assertEquals(expectedValue, matcher.group(1));
     }
 }

@@ -18,38 +18,6 @@ public class MT202 {
     private Party beneficiaryInstitution;
     private String senderToReceiverInformation;
 
-    public static class Party {
-        private String bic;
-        private String accountNumber;
-        private String nameAndAddress;
-
-        public String getBic() {
-            return bic;
-        }
-
-        public void setBic(String bic) {
-            this.bic = bic;
-        }
-
-        public String getAccountNumber() {
-            return accountNumber;
-        }
-
-        public void setAccountNumber(String accountNumber) {
-            this.accountNumber = accountNumber;
-        }
-
-        public String getNameAndAddress() {
-            return nameAndAddress;
-        }
-
-        public void setNameAndAddress(String nameAndAddress) {
-            this.nameAndAddress = nameAndAddress;
-        }
-    }
-
-    // Getters and setters
-
     public String getTransactionReferenceNumber() {
         return transactionReferenceNumber;
     }
@@ -144,5 +112,35 @@ public class MT202 {
 
     public void setSenderToReceiverInformation(String senderToReceiverInformation) {
         this.senderToReceiverInformation = senderToReceiverInformation;
+    }
+
+    public static class Party {
+        private String nameAndAddress;
+        private String bic;
+        private String accountNumber;
+
+        public String getNameAndAddress() {
+            return nameAndAddress;
+        }
+
+        public void setNameAndAddress(String nameAndAddress) {
+            this.nameAndAddress = nameAndAddress;
+        }
+
+        public String getBic() {
+            return bic;
+        }
+
+        public void setBic(String bic) {
+            this.bic = bic;
+        }
+
+        public String getAccountNumber() {
+            return accountNumber;
+        }
+
+        public void setAccountNumber(String accountNumber) {
+            this.accountNumber = accountNumber;
+        }
     }
 }

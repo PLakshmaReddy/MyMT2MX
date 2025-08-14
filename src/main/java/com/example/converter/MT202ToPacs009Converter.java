@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,13 +29,13 @@ public class MT202ToPacs009Converter implements Converter {
 
     @Override
     public String convert(String mt202Message) {
-        com.example.converter.MT202 mt202 = parseMt202(mt202Message);
+        MT202 mt202 = parseMt202(mt202Message);
         Pacs009 pacs009 = mapToPacs009(mt202);
         return generatePacs009(pacs009);
     }
 
-    private com.example.converter.MT202 parseMt202(String mt202Message) {
-        com.example.converter.MT202 mt202 = new com.example.converter.MT202();
+    private MT202 parseMt202(String mt202Message) {
+        MT202 mt202 = new MT202();
 
         mt202.setTransactionReferenceNumber(getTagValue(mt202Message, "20"));
         mt202.setRelatedReference(getTagValue(mt202Message, "21"));
@@ -52,6 +53,10 @@ public class MT202ToPacs009Converter implements Converter {
         }
 
         mt202.setOrderingInstitution(parseParty(mt202Message, "52"));
+        mt202.setSendersCorrespondent(parseParty(mt202Message, "53"));
+        mt202.setReceiversCorrespondent(parseParty(mt202Message, "54"));
+        mt202.setIntermediary(parseParty(mt202Message, "56"));
+        mt202.setAccountWithInstitution(parseParty(mt202Message, "57"));
         mt202.setBeneficiaryInstitution(parseParty(mt202Message, "58"));
 
         mt202.setSenderToReceiverInformation(getTagValue(mt202Message, "72"));
@@ -59,21 +64,17 @@ public class MT202ToPacs009Converter implements Converter {
         return mt202;
     }
 
-    private com.example.converter.MT202.Party parseParty(String mt202Message, String tag) {
+    private MT202.Party parseParty(String mt202Message, String tag) {
         String tagAValue = getTagValue(mt202Message, tag + "A");
         if (tagAValue != null) {
-            com.example.converter.MT202.Party party = new com.example.converter.MT202.Party();
-            String[] parts = tagAValue.split("/");
-            party.setBic(parts[0]);
-            if (parts.length > 1) {
-                party.setAccountNumber(parts[1]);
-            }
+            MT202.Party party = new MT202.Party();
+            party.setBic(tagAValue);
             return party;
         }
 
         String tagDValue = getTagValue(mt202Message, tag + "D");
         if (tagDValue != null) {
-            com.example.converter.MT202.Party party = new com.example.converter.MT202.Party();
+            MT202.Party party = new MT202.Party();
             String[] lines = tagDValue.split("\\n");
             party.setNameAndAddress(lines[0]);
             if (lines.length > 1) {
@@ -102,14 +103,13 @@ public class MT202ToPacs009Converter implements Converter {
         return null;
     }
 
-
-    private Pacs009 mapToPacs009(com.example.converter.MT202 mt202) {
+    private Pacs009 mapToPacs009(MT202 mt202) {
         Pacs009 pacs009 = new Pacs009();
 
         // Group Header
         Pacs009.GroupHeader groupHeader = new Pacs009.GroupHeader();
-        groupHeader.setMessageIdentification(java.util.UUID.randomUUID().toString());
-        groupHeader.setCreationDateTime(new java.util.Date());
+        groupHeader.setMessageIdentification(UUID.randomUUID().toString());
+        groupHeader.setCreationDateTime(new Date());
         groupHeader.setNumberOfTransactions(1);
         Pacs009.SettlementInformation settlementInformation = new Pacs009.SettlementInformation();
         settlementInformation.setSettlementMethod(configuration.getProperty("settlement.method"));
@@ -117,40 +117,47 @@ public class MT202ToPacs009Converter implements Converter {
         pacs009.setGroupHeader(groupHeader);
 
         // Financial Institution Credit Transfer
-        Pacs009.FinancialInstitutionCreditTransfer financialInstitutionCreditTransfer = new Pacs009.FinancialInstitutionCreditTransfer();
+        Pacs009.FinancialInstitutionCreditTransfer fiCdtTrf = new Pacs009.FinancialInstitutionCreditTransfer();
 
-        Pacs009.PaymentIdentification paymentIdentification = new Pacs009.PaymentIdentification();
-        paymentIdentification.setInstructionIdentification(mt202.getTransactionReferenceNumber());
-        paymentIdentification.setEndToEndIdentification(mt202.getRelatedReference());
-        financialInstitutionCreditTransfer.setPaymentIdentification(paymentIdentification);
+        Pacs009.PaymentIdentification pmtId = new Pacs009.PaymentIdentification();
+        pmtId.setInstructionIdentification(mt202.getTransactionReferenceNumber());
+        pmtId.setEndToEndIdentification(mt202.getRelatedReference());
+        fiCdtTrf.setPaymentIdentification(pmtId);
 
         Pacs009.Amount amount = new Pacs009.Amount();
         amount.setCurrency(mt202.getCurrency());
         amount.setValue(mt202.getAmount());
-        financialInstitutionCreditTransfer.setInterbankSettlementAmount(amount);
+        fiCdtTrf.setInterbankSettlementAmount(amount);
 
-        financialInstitutionCreditTransfer.setInterbankSettlementDate(mt202.getValueDate());
+        fiCdtTrf.setInterbankSettlementDate(mt202.getValueDate());
 
-        financialInstitutionCreditTransfer.setInstructingAgent(mapParty(mt202.getOrderingInstitution()));
-        financialInstitutionCreditTransfer.setInstructedAgent(mapParty(mt202.getBeneficiaryInstitution()));
+        fiCdtTrf.setInstructingAgent(mapParty(mt202.getOrderingInstitution()));
+        fiCdtTrf.setInstructedAgent(mapParty(mt202.getBeneficiaryInstitution()));
+        fiCdtTrf.setSendersCorrespondent(mapParty(mt202.getSendersCorrespondent()));
+        fiCdtTrf.setReceiversCorrespondent(mapParty(mt202.getReceiversCorrespondent()));
+        fiCdtTrf.setIntermediary(mapParty(mt202.getIntermediary()));
+        if (mt202.getAccountWithInstitution() != null) {
+            if (mt202.getAccountWithInstitution().getBic() != null) {
+                fiCdtTrf.setInstructionForNextAgent(mt202.getAccountWithInstitution().getBic());
+            } else {
+                fiCdtTrf.setInstructionForNextAgent(mt202.getAccountWithInstitution().getNameAndAddress());
+            }
+        }
+        fiCdtTrf.setRemittanceInformation(mt202.getSenderToReceiverInformation());
 
-        pacs009.setFinancialInstitutionCreditTransfer(financialInstitutionCreditTransfer);
+        pacs009.setFinancialInstitutionCreditTransfer(fiCdtTrf);
 
         return pacs009;
     }
 
-    private Pacs009.Party mapParty(com.example.converter.MT202.Party mtParty) {
+    private Pacs009.Party mapParty(MT202.Party mtParty) {
         if (mtParty == null) {
             return null;
         }
         Pacs009.Party pacsParty = new Pacs009.Party();
         pacsParty.setBic(mtParty.getBic());
         pacsParty.setAccountNumber(mtParty.getAccountNumber());
-        if (mtParty.getNameAndAddress() != null) {
-            pacsParty.setName(mtParty.getNameAndAddress());
-        } else {
-            pacsParty.setName(mtParty.getBic());
-        }
+        pacsParty.setName(mtParty.getNameAndAddress());
         return pacsParty;
     }
 
@@ -211,17 +218,67 @@ public class MT202ToPacs009Converter implements Converter {
             if (pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent() != null) {
                 Element instgAgt = doc.createElement("InstgAgt");
                 finInstnCdtTrf.appendChild(instgAgt);
-                Element nm = doc.createElement("Nm");
-                nm.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent().getName()));
-                instgAgt.appendChild(nm);
+                Element finInstnId = doc.createElement("FinInstnId");
+                instgAgt.appendChild(finInstnId);
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent().getBic()));
+                finInstnId.appendChild(bicfi);
             }
 
             if (pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent() != null) {
                 Element instdAgt = doc.createElement("InstdAgt");
                 finInstnCdtTrf.appendChild(instdAgt);
-                Element nm = doc.createElement("Nm");
-                nm.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getName()));
-                instdAgt.appendChild(nm);
+                Element finInstnId = doc.createElement("FinInstnId");
+                instdAgt.appendChild(finInstnId);
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getBic()));
+                finInstnId.appendChild(bicfi);
+            }
+
+            if (pacs009.getFinancialInstitutionCreditTransfer().getSendersCorrespondent() != null) {
+                Element sndrsCorr = doc.createElement("SndrsCorr");
+                finInstnCdtTrf.appendChild(sndrsCorr);
+                Element finInstnId = doc.createElement("FinInstnId");
+                sndrsCorr.appendChild(finInstnId);
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getSendersCorrespondent().getBic()));
+                finInstnId.appendChild(bicfi);
+            }
+
+            if (pacs009.getFinancialInstitutionCreditTransfer().getReceiversCorrespondent() != null) {
+                Element rcvrsCorr = doc.createElement("RcvrsCorr");
+                finInstnCdtTrf.appendChild(rcvrsCorr);
+                Element finInstnId = doc.createElement("FinInstnId");
+                rcvrsCorr.appendChild(finInstnId);
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getReceiversCorrespondent().getBic()));
+                finInstnId.appendChild(bicfi);
+            }
+
+            if (pacs009.getFinancialInstitutionCreditTransfer().getIntermediary() != null) {
+                Element intrmyAgt1 = doc.createElement("IntrmyAgt1");
+                finInstnCdtTrf.appendChild(intrmyAgt1);
+                Element finInstnId = doc.createElement("FinInstnId");
+                intrmyAgt1.appendChild(finInstnId);
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getIntermediary().getBic()));
+                finInstnId.appendChild(bicfi);
+            }
+
+            if (pacs009.getFinancialInstitutionCreditTransfer().getInstructionForNextAgent() != null) {
+                Element instrForNxtAgt = doc.createElement("InstrForNxtAgt");
+                finInstnCdtTrf.appendChild(instrForNxtAgt);
+                Element instrInf = doc.createElement("InstrInf");
+                instrInf.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructionForNextAgent()));
+                instrForNxtAgt.appendChild(instrInf);
+            }
+
+            if (pacs009.getFinancialInstitutionCreditTransfer().getRemittanceInformation() != null) {
+                Element rmtInf = doc.createElement("RmtInf");
+                finInstnCdtTrf.appendChild(rmtInf);
+                Element ustrd = doc.createElement("Ustrd");
+                ustrd.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getRemittanceInformation()));
+                rmtInf.appendChild(ustrd);
             }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

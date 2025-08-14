@@ -81,6 +81,11 @@ public class Pacs009 {
         private Date interbankSettlementDate;
         private Party instructingAgent;
         private Party instructedAgent;
+        private String remittanceInformation;
+        private Party sendersCorrespondent;
+        private Party receiversCorrespondent;
+        private Party intermediary;
+        private String instructionForNextAgent;
 
         public PaymentIdentification getPaymentIdentification() {
             return paymentIdentification;
@@ -120,6 +125,46 @@ public class Pacs009 {
 
         public void setInstructedAgent(Party instructedAgent) {
             this.instructedAgent = instructedAgent;
+        }
+
+        public String getRemittanceInformation() {
+            return remittanceInformation;
+        }
+
+        public void setRemittanceInformation(String remittanceInformation) {
+            this.remittanceInformation = remittanceInformation;
+        }
+
+        public Party getSendersCorrespondent() {
+            return sendersCorrespondent;
+        }
+
+        public void setSendersCorrespondent(Party sendersCorrespondent) {
+            this.sendersCorrespondent = sendersCorrespondent;
+        }
+
+        public Party getReceiversCorrespondent() {
+            return receiversCorrespondent;
+        }
+
+        public void setReceiversCorrespondent(Party receiversCorrespondent) {
+            this.receiversCorrespondent = receiversCorrespondent;
+        }
+
+        public Party getIntermediary() {
+            return intermediary;
+        }
+
+        public void setIntermediary(Party intermediary) {
+            this.intermediary = intermediary;
+        }
+
+        public String getInstructionForNextAgent() {
+            return instructionForNextAgent;
+        }
+
+        public void setInstructionForNextAgent(String instructionForNextAgent) {
+            this.instructionForNextAgent = instructionForNextAgent;
         }
     }
 
