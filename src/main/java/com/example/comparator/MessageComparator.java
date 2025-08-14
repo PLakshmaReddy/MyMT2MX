@@ -59,6 +59,18 @@ public class MessageComparator {
             compareAndAddDifference(result, "Beneficiary Institution BIC", mt202.getBeneficiaryInstitution().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getBic());
         }
 
+        // Compare Intermediary Agents
+        if (mt202.getIntermediaryInstitution1() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent1() != null) {
+            compareAndAddDifference(result, "Intermediary Agent 1 BIC", mt202.getIntermediaryInstitution1().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent1().getBic());
+        }
+        if (mt202.getIntermediaryInstitution2() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent2() != null) {
+            compareAndAddDifference(result, "Intermediary Agent 2 BIC", mt202.getIntermediaryInstitution2().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent2().getBic());
+        }
+        if (mt202.getReceivingAgent() != null && pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent3() != null) {
+            compareAndAddDifference(result, "Receiving Agent BIC", mt202.getReceivingAgent().getBic(), pacs009.getFinancialInstitutionCreditTransfer().getIntermediaryAgent3().getBic());
+        }
+
+
         // Compare Sender to Receiver Information
         compareAndAddDifference(result, "Sender to Receiver Information", mt202.getSenderToReceiverInformation(), pacs009.getFinancialInstitutionCreditTransfer().getSenderToReceiverInformation());
 

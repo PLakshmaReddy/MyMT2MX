@@ -19,10 +19,16 @@
                 <BICFI>BANKUS33</BICFI>
             </FinInstnId>
         </InstgAgt>
+        <IntrmyAgt1>
+            <FinInstnId>
+                <BICFI>BANKUS34</BICFI>
+            </FinInstnId>
+        </IntrmyAgt1>
         <InstdAgt>
             <FinInstnId>
                 <BICFI>BANKGB2L</BICFI>
             </FinInstnId>
         </InstdAgt>
+        <Ustrd>/INFO/some info</Ustrd>
     </FinInstnCdtTrf>
 </Document>

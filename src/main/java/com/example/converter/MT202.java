@@ -17,6 +17,10 @@ public class MT202 {
     private Party accountWithInstitution;
     private Party beneficiaryInstitution;
     private String senderToReceiverInformation;
+    private Party intermediaryInstitution1; // 53
+    private Party intermediaryInstitution2; // 54
+    private Party receivingAgent; // 56
+    private Party beneficiarysCorrespondent; // 57
 
     public static class Party {
         private String bic;
@@ -144,5 +148,37 @@ public class MT202 {
 
     public void setSenderToReceiverInformation(String senderToReceiverInformation) {
         this.senderToReceiverInformation = senderToReceiverInformation;
+    }
+
+    public Party getIntermediaryInstitution1() {
+        return intermediaryInstitution1;
+    }
+
+    public void setIntermediaryInstitution1(Party intermediaryInstitution1) {
+        this.intermediaryInstitution1 = intermediaryInstitution1;
+    }
+
+    public Party getIntermediaryInstitution2() {
+        return intermediaryInstitution2;
+    }
+
+    public void setIntermediaryInstitution2(Party intermediaryInstitution2) {
+        this.intermediaryInstitution2 = intermediaryInstitution2;
+    }
+
+    public Party getReceivingAgent() {
+        return receivingAgent;
+    }
+
+    public void setReceivingAgent(Party receivingAgent) {
+        this.receivingAgent = receivingAgent;
+    }
+
+    public Party getBeneficiarysCorrespondent() {
+        return beneficiarysCorrespondent;
+    }
+
+    public void setBeneficiarysCorrespondent(Party beneficiarysCorrespondent) {
+        this.beneficiarysCorrespondent = beneficiarysCorrespondent;
     }
 }

@@ -28,6 +28,10 @@ public class MT202Parser {
         }
 
         mt202.setOrderingInstitution(parseParty(mt202Message, "52"));
+        mt202.setIntermediaryInstitution1(parseParty(mt202Message, "53"));
+        mt202.setIntermediaryInstitution2(parseParty(mt202Message, "54"));
+        mt202.setReceivingAgent(parseParty(mt202Message, "56"));
+        mt202.setBeneficiarysCorrespondent(parseParty(mt202Message, "57"));
         mt202.setBeneficiaryInstitution(parseParty(mt202Message, "58"));
 
         mt202.setSenderToReceiverInformation(getTagValue(mt202Message, "72"));

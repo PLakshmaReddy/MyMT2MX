@@ -71,6 +71,9 @@ public class Pacs009Parser {
             }
 
             creditTransfer.setInstructingAgent(parseParty(finInstnCdtTrf.getChild("InstgAgt", finInstnCdtTrf.getNamespace())));
+            creditTransfer.setIntermediaryAgent1(parseParty(finInstnCdtTrf.getChild("IntrmyAgt1", finInstnCdtTrf.getNamespace())));
+            creditTransfer.setIntermediaryAgent2(parseParty(finInstnCdtTrf.getChild("IntrmyAgt2", finInstnCdtTrf.getNamespace())));
+            creditTransfer.setIntermediaryAgent3(parseParty(finInstnCdtTrf.getChild("IntrmyAgt3", finInstnCdtTrf.getNamespace())));
             creditTransfer.setInstructedAgent(parseParty(finInstnCdtTrf.getChild("InstdAgt", finInstnCdtTrf.getNamespace())));
 
             Element ustrd = finInstnCdtTrf.getChild("Ustrd", finInstnCdtTrf.getNamespace());

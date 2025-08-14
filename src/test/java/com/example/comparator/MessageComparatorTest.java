@@ -25,6 +25,7 @@ class MessageComparatorTest {
                 ":21:RELREF456\n" +
                 ":32A:240815USD1000.00\n" +
                 ":52A:BANKUS33\n" +
+                ":53A:BANKUS34\n" +
                 ":58A:BANKGB2L\n" +
                 ":72:/INFO/some info\n"
         ).getBytes());
@@ -48,6 +49,7 @@ class MessageComparatorTest {
                 "        <IntrBkSttlmAmt Ccy=\"USD\">1000.00</IntrBkSttlmAmt>\n" +
                 "        <IntrBkSttlmDt>2024-08-15</IntrBkSttlmDt>\n" +
                 "        <InstgAgt><FinInstnId><BICFI>BANKUS33</BICFI></FinInstnId></InstgAgt>\n" +
+                "        <IntrmyAgt1><FinInstnId><BICFI>BANKUS34</BICFI></FinInstnId></IntrmyAgt1>\n" +
                 "        <InstdAgt><FinInstnId><BICFI>BANKGB2L</BICFI></FinInstnId></InstdAgt>\n" +
                 "        <Ustrd>/INFO/some info</Ustrd>\n" +
                 "    </FinInstnCdtTrf>\n" +
@@ -68,6 +70,7 @@ class MessageComparatorTest {
                 ":21:RELREF012\n" +
                 ":32A:240816EUR2000.50\n" +
                 ":52A:BANKDEFF\n" +
+                ":53A:BANKDEGG\n" +
                 ":58A:BANKFRPP\n" +
                 ":72:/INFO/some other info\n"
         ).getBytes());
@@ -91,6 +94,7 @@ class MessageComparatorTest {
                 "        <IntrBkSttlmAmt Ccy=\"EUR\">2000.51</IntrBkSttlmAmt>\n" +
                 "        <IntrBkSttlmDt>2024-08-17</IntrBkSttlmDt>\n" +
                 "        <InstgAgt><FinInstnId><BICFI>BANKDEFF</BICFI></FinInstnId></InstgAgt>\n" +
+                "        <IntrmyAgt1><FinInstnId><BICFI>BANKDEHH</BICFI></FinInstnId></IntrmyAgt1>\n" +
                 "        <InstdAgt><FinInstnId><BICFI>BANKNL2A</BICFI></FinInstnId></InstdAgt>\n" +
                 "        <Ustrd>/INFO/some other info DIFFERENT</Ustrd>\n" +
                 "    </FinInstnCdtTrf>\n" +
@@ -101,7 +105,7 @@ class MessageComparatorTest {
         ComparisonResult result = comparator.compare(mtFile, pacsFile);
 
         assertTrue(result.hasDifferences());
-        assertEquals(6, result.getDifferences().size());
+        assertEquals(7, result.getDifferences().size());
 
         // Check for specific differences
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Transaction Reference")));
@@ -110,5 +114,6 @@ class MessageComparatorTest {
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Value Date")));
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Beneficiary Institution BIC")));
         assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Sender to Receiver Information")));
+        assertTrue(result.getDifferences().stream().anyMatch(d -> d.getFieldName().equals("Intermediary Agent 1 BIC")));
     }
 }

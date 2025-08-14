@@ -82,6 +82,9 @@ public class Pacs009 {
         private Party instructingAgent;
         private Party instructedAgent;
         private String senderToReceiverInformation;
+        private Party intermediaryAgent1;
+        private Party intermediaryAgent2;
+        private Party intermediaryAgent3;
 
         public PaymentIdentification getPaymentIdentification() {
             return paymentIdentification;
@@ -129,6 +132,30 @@ public class Pacs009 {
 
         public void setSenderToReceiverInformation(String senderToReceiverInformation) {
             this.senderToReceiverInformation = senderToReceiverInformation;
+        }
+
+        public Party getIntermediaryAgent1() {
+            return intermediaryAgent1;
+        }
+
+        public void setIntermediaryAgent1(Party intermediaryAgent1) {
+            this.intermediaryAgent1 = intermediaryAgent1;
+        }
+
+        public Party getIntermediaryAgent2() {
+            return intermediaryAgent2;
+        }
+
+        public void setIntermediaryAgent2(Party intermediaryAgent2) {
+            this.intermediaryAgent2 = intermediaryAgent2;
+        }
+
+        public Party getIntermediaryAgent3() {
+            return intermediaryAgent3;
+        }
+
+        public void setIntermediaryAgent3(Party intermediaryAgent3) {
+            this.intermediaryAgent3 = intermediaryAgent3;
         }
     }
 
