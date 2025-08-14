@@ -3,10 +3,10 @@ package com.example.converter;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Pacs008 {
+public class Pacs009 {
 
     private GroupHeader groupHeader;
-    private CreditTransferTransactionInformation creditTransferTransactionInformation;
+    private FinancialInstitutionCreditTransfer financialInstitutionCreditTransfer;
 
     public GroupHeader getGroupHeader() {
         return groupHeader;
@@ -16,12 +16,12 @@ public class Pacs008 {
         this.groupHeader = groupHeader;
     }
 
-    public CreditTransferTransactionInformation getCreditTransferTransactionInformation() {
-        return creditTransferTransactionInformation;
+    public FinancialInstitutionCreditTransfer getFinancialInstitutionCreditTransfer() {
+        return financialInstitutionCreditTransfer;
     }
 
-    public void setCreditTransferTransactionInformation(CreditTransferTransactionInformation creditTransferTransactionInformation) {
-        this.creditTransferTransactionInformation = creditTransferTransactionInformation;
+    public void setFinancialInstitutionCreditTransfer(FinancialInstitutionCreditTransfer financialInstitutionCreditTransfer) {
+        this.financialInstitutionCreditTransfer = financialInstitutionCreditTransfer;
     }
 
     public static class GroupHeader {
@@ -75,13 +75,12 @@ public class Pacs008 {
         }
     }
 
-    public static class CreditTransferTransactionInformation {
+    public static class FinancialInstitutionCreditTransfer {
         private PaymentIdentification paymentIdentification;
         private Amount interbankSettlementAmount;
         private Date interbankSettlementDate;
-        private Party debtor;
-        private Party creditor;
-        private String remittanceInformation;
+        private Party instructingAgent;
+        private Party instructedAgent;
 
         public PaymentIdentification getPaymentIdentification() {
             return paymentIdentification;
@@ -107,28 +106,20 @@ public class Pacs008 {
             this.interbankSettlementDate = interbankSettlementDate;
         }
 
-        public Party getDebtor() {
-            return debtor;
+        public Party getInstructingAgent() {
+            return instructingAgent;
         }
 
-        public void setDebtor(Party debtor) {
-            this.debtor = debtor;
+        public void setInstructingAgent(Party instructingAgent) {
+            this.instructingAgent = instructingAgent;
         }
 
-        public Party getCreditor() {
-            return creditor;
+        public Party getInstructedAgent() {
+            return instructedAgent;
         }
 
-        public void setCreditor(Party creditor) {
-            this.creditor = creditor;
-        }
-
-        public String getRemittanceInformation() {
-            return remittanceInformation;
-        }
-
-        public void setRemittanceInformation(String remittanceInformation) {
-            this.remittanceInformation = remittanceInformation;
+        public void setInstructedAgent(Party instructedAgent) {
+            this.instructedAgent = instructedAgent;
         }
     }
 

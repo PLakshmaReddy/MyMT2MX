@@ -18,19 +18,19 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MT202ToPacs008Converter implements Converter {
+public class MT202ToPacs009Converter implements Converter {
 
     private final Configuration configuration;
 
-    public MT202ToPacs008Converter(Configuration configuration) {
+    public MT202ToPacs009Converter(Configuration configuration) {
         this.configuration = configuration;
     }
 
     @Override
     public String convert(String mt202Message) {
         com.example.converter.MT202 mt202 = parseMt202(mt202Message);
-        Pacs008 pacs008 = mapToPacs008(mt202);
-        return generatePacs008(pacs008);
+        Pacs009 pacs009 = mapToPacs009(mt202);
+        return generatePacs009(pacs009);
     }
 
     private com.example.converter.MT202 parseMt202(String mt202Message) {
@@ -103,49 +103,47 @@ public class MT202ToPacs008Converter implements Converter {
     }
 
 
-    private Pacs008 mapToPacs008(com.example.converter.MT202 mt202) {
-        Pacs008 pacs008 = new Pacs008();
+    private Pacs009 mapToPacs009(com.example.converter.MT202 mt202) {
+        Pacs009 pacs009 = new Pacs009();
 
         // Group Header
-        Pacs008.GroupHeader groupHeader = new Pacs008.GroupHeader();
+        Pacs009.GroupHeader groupHeader = new Pacs009.GroupHeader();
         groupHeader.setMessageIdentification(java.util.UUID.randomUUID().toString());
         groupHeader.setCreationDateTime(new java.util.Date());
         groupHeader.setNumberOfTransactions(1);
-        Pacs008.SettlementInformation settlementInformation = new Pacs008.SettlementInformation();
+        Pacs009.SettlementInformation settlementInformation = new Pacs009.SettlementInformation();
         settlementInformation.setSettlementMethod(configuration.getProperty("settlement.method"));
         groupHeader.setSettlementInformation(settlementInformation);
-        pacs008.setGroupHeader(groupHeader);
+        pacs009.setGroupHeader(groupHeader);
 
-        // Credit Transfer Transaction Information
-        Pacs008.CreditTransferTransactionInformation creditTransferTransactionInformation = new Pacs008.CreditTransferTransactionInformation();
+        // Financial Institution Credit Transfer
+        Pacs009.FinancialInstitutionCreditTransfer financialInstitutionCreditTransfer = new Pacs009.FinancialInstitutionCreditTransfer();
 
-        Pacs008.PaymentIdentification paymentIdentification = new Pacs008.PaymentIdentification();
+        Pacs009.PaymentIdentification paymentIdentification = new Pacs009.PaymentIdentification();
         paymentIdentification.setInstructionIdentification(mt202.getTransactionReferenceNumber());
         paymentIdentification.setEndToEndIdentification(mt202.getRelatedReference());
-        creditTransferTransactionInformation.setPaymentIdentification(paymentIdentification);
+        financialInstitutionCreditTransfer.setPaymentIdentification(paymentIdentification);
 
-        Pacs008.Amount amount = new Pacs008.Amount();
+        Pacs009.Amount amount = new Pacs009.Amount();
         amount.setCurrency(mt202.getCurrency());
         amount.setValue(mt202.getAmount());
-        creditTransferTransactionInformation.setInterbankSettlementAmount(amount);
+        financialInstitutionCreditTransfer.setInterbankSettlementAmount(amount);
 
-        creditTransferTransactionInformation.setInterbankSettlementDate(mt202.getValueDate());
+        financialInstitutionCreditTransfer.setInterbankSettlementDate(mt202.getValueDate());
 
-        creditTransferTransactionInformation.setDebtor(mapParty(mt202.getOrderingInstitution()));
-        creditTransferTransactionInformation.setCreditor(mapParty(mt202.getBeneficiaryInstitution()));
+        financialInstitutionCreditTransfer.setInstructingAgent(mapParty(mt202.getOrderingInstitution()));
+        financialInstitutionCreditTransfer.setInstructedAgent(mapParty(mt202.getBeneficiaryInstitution()));
 
-        creditTransferTransactionInformation.setRemittanceInformation(mt202.getSenderToReceiverInformation());
+        pacs009.setFinancialInstitutionCreditTransfer(financialInstitutionCreditTransfer);
 
-        pacs008.setCreditTransferTransactionInformation(creditTransferTransactionInformation);
-
-        return pacs008;
+        return pacs009;
     }
 
-    private Pacs008.Party mapParty(com.example.converter.MT202.Party mtParty) {
+    private Pacs009.Party mapParty(com.example.converter.MT202.Party mtParty) {
         if (mtParty == null) {
             return null;
         }
-        Pacs008.Party pacsParty = new Pacs008.Party();
+        Pacs009.Party pacsParty = new Pacs009.Party();
         pacsParty.setBic(mtParty.getBic());
         pacsParty.setAccountNumber(mtParty.getAccountNumber());
         if (mtParty.getNameAndAddress() != null) {
@@ -156,7 +154,7 @@ public class MT202ToPacs008Converter implements Converter {
         return pacsParty;
     }
 
-    private String generatePacs008(Pacs008 pacs008) {
+    private String generatePacs009(Pacs009 pacs009) {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -169,61 +167,61 @@ public class MT202ToPacs008Converter implements Converter {
             rootElement.appendChild(grpHdr);
 
             Element msgId = doc.createElement("MsgId");
-            msgId.appendChild(doc.createTextNode(pacs008.getGroupHeader().getMessageIdentification()));
+            msgId.appendChild(doc.createTextNode(pacs009.getGroupHeader().getMessageIdentification()));
             grpHdr.appendChild(msgId);
 
             Element creDtTm = doc.createElement("CreDtTm");
-            creDtTm.appendChild(doc.createTextNode(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(pacs008.getGroupHeader().getCreationDateTime())));
+            creDtTm.appendChild(doc.createTextNode(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(pacs009.getGroupHeader().getCreationDateTime())));
             grpHdr.appendChild(creDtTm);
 
             Element nbOfTxs = doc.createElement("NbOfTxs");
-            nbOfTxs.appendChild(doc.createTextNode(String.valueOf(pacs008.getGroupHeader().getNumberOfTransactions())));
+            nbOfTxs.appendChild(doc.createTextNode(String.valueOf(pacs009.getGroupHeader().getNumberOfTransactions())));
             grpHdr.appendChild(nbOfTxs);
 
             Element sttlmInf = doc.createElement("SttlmInf");
             grpHdr.appendChild(sttlmInf);
 
             Element sttlmMtd = doc.createElement("SttlmMtd");
-            sttlmMtd.appendChild(doc.createTextNode(pacs008.getGroupHeader().getSettlementInformation().getSettlementMethod()));
+            sttlmMtd.appendChild(doc.createTextNode(pacs009.getGroupHeader().getSettlementInformation().getSettlementMethod()));
             sttlmInf.appendChild(sttlmMtd);
 
-            Element cdtTrfTxInf = doc.createElement("CdtTrfTxInf");
-            rootElement.appendChild(cdtTrfTxInf);
+            Element finInstnCdtTrf = doc.createElement("FinInstnCdtTrf");
+            rootElement.appendChild(finInstnCdtTrf);
 
             Element pmtId = doc.createElement("PmtId");
-            cdtTrfTxInf.appendChild(pmtId);
+            finInstnCdtTrf.appendChild(pmtId);
 
             Element instrId = doc.createElement("InstrId");
-            instrId.appendChild(doc.createTextNode(pacs008.getCreditTransferTransactionInformation().getPaymentIdentification().getInstructionIdentification()));
+            instrId.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getPaymentIdentification().getInstructionIdentification()));
             pmtId.appendChild(instrId);
 
             Element endToEndId = doc.createElement("EndToEndId");
-            endToEndId.appendChild(doc.createTextNode(pacs008.getCreditTransferTransactionInformation().getPaymentIdentification().getEndToEndIdentification()));
+            endToEndId.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getPaymentIdentification().getEndToEndIdentification()));
             pmtId.appendChild(endToEndId);
 
             Element intrBkSttlmAmt = doc.createElement("IntrBkSttlmAmt");
-            intrBkSttlmAmt.setAttribute("Ccy", pacs008.getCreditTransferTransactionInformation().getInterbankSettlementAmount().getCurrency());
-            intrBkSttlmAmt.appendChild(doc.createTextNode(pacs008.getCreditTransferTransactionInformation().getInterbankSettlementAmount().getValue().toPlainString()));
-            cdtTrfTxInf.appendChild(intrBkSttlmAmt);
+            intrBkSttlmAmt.setAttribute("Ccy", pacs009.getFinancialInstitutionCreditTransfer().getInterbankSettlementAmount().getCurrency());
+            intrBkSttlmAmt.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInterbankSettlementAmount().getValue().toPlainString()));
+            finInstnCdtTrf.appendChild(intrBkSttlmAmt);
 
             Element intrBkSttlmDt = doc.createElement("IntrBkSttlmDt");
-            intrBkSttlmDt.appendChild(doc.createTextNode(new SimpleDateFormat("yyyy-MM-dd").format(pacs008.getCreditTransferTransactionInformation().getInterbankSettlementDate())));
-            cdtTrfTxInf.appendChild(intrBkSttlmDt);
+            intrBkSttlmDt.appendChild(doc.createTextNode(new SimpleDateFormat("yyyy-MM-dd").format(pacs009.getFinancialInstitutionCreditTransfer().getInterbankSettlementDate())));
+            finInstnCdtTrf.appendChild(intrBkSttlmDt);
 
-            if (pacs008.getCreditTransferTransactionInformation().getDebtor() != null) {
-                Element dbtr = doc.createElement("Dbtr");
-                cdtTrfTxInf.appendChild(dbtr);
+            if (pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent() != null) {
+                Element instgAgt = doc.createElement("InstgAgt");
+                finInstnCdtTrf.appendChild(instgAgt);
                 Element nm = doc.createElement("Nm");
-                nm.appendChild(doc.createTextNode(pacs008.getCreditTransferTransactionInformation().getDebtor().getName()));
-                dbtr.appendChild(nm);
+                nm.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent().getName()));
+                instgAgt.appendChild(nm);
             }
 
-            if (pacs008.getCreditTransferTransactionInformation().getCreditor() != null) {
-                Element cdtr = doc.createElement("Cdtr");
-                cdtTrfTxInf.appendChild(cdtr);
+            if (pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent() != null) {
+                Element instdAgt = doc.createElement("InstdAgt");
+                finInstnCdtTrf.appendChild(instdAgt);
                 Element nm = doc.createElement("Nm");
-                nm.appendChild(doc.createTextNode(pacs008.getCreditTransferTransactionInformation().getCreditor().getName()));
-                cdtr.appendChild(nm);
+                nm.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getName()));
+                instdAgt.appendChild(nm);
             }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
