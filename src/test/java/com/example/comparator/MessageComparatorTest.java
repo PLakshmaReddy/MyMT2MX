@@ -252,11 +252,10 @@ class MessageComparatorTest {
     }
 
     @Test
-    void testCompare_withDataSourceScheme() throws IOException, JDOMException, ParseException {
-        File mtFile = tempDir.resolve("test_dss.mt202").toFile();
+    void testCompare_withDSS_difference() throws IOException, JDOMException, ParseException {
+        File mtFile = tempDir.resolve("test_dss_diff.mt202").toFile();
         Files.write(mtFile.toPath(), (
-                ":20:TXREF-DSS\n" +
-                ":21:RELREF-DSS\n" +
+                ":20:TXREF-DSS-DIFF\n" +
                 ":32A:240819EUR9999\n" +
                 ":53D:/DSS/NAT/1234\n" +
                 "TEST BANK DSS\n" +
@@ -264,18 +263,17 @@ class MessageComparatorTest {
                 ":58A:BANKDEFF\n"
         ).getBytes());
 
-        File pacsFile = tempDir.resolve("test_dss.pacs009").toFile();
+        File pacsFile = tempDir.resolve("test_dss_diff.pacs009").toFile();
         Files.write(pacsFile.toPath(), (
                 "<Document>\n" +
                 "    <GrpHdr>\n" +
-                "        <MsgId>MSGID-DSS</MsgId>\n" +
+                "        <MsgId>MSGID-DSS-DIFF</MsgId>\n" +
                 "        <CreDtTm>2024-08-19T15:00:00</CreDtTm>\n" +
                 "        <NbOfTxs>1</NbOfTxs>\n" +
                 "    </GrpHdr>\n" +
                 "    <FinInstnCdtTrf>\n" +
                 "        <PmtId>\n" +
-                "            <InstrId>TXREF-DSS</InstrId>\n" +
-                "            <EndToEndId>RELREF-DSS</EndToEndId>\n" +
+                "            <InstrId>TXREF-DSS-DIFF</InstrId>\n" +
                 "        </PmtId>\n" +
                 "        <IntrBkSttlmAmt Ccy=\"EUR\">9999</IntrBkSttlmAmt>\n" +
                 "        <IntrBkSttlmDt>2024-08-19</IntrBkSttlmDt>\n" +
@@ -286,7 +284,7 @@ class MessageComparatorTest {
                 "                    <AdrLine>TEST ADDRESS DSS</AdrLine>\n" +
                 "                </PstlAdr>\n" +
                 "                <Othr>\n" +
-                "                    <SchmeNm><Cd>NAT</Cd></SchmeNm>\n" +
+                "                    <SchmeNm><Cd>CUID</Cd></SchmeNm>\n" +
                 "                </Othr>\n" +
                 "            </FinInstnId>\n" +
                 "        </IntrmyAgt1>\n" +
@@ -298,6 +296,8 @@ class MessageComparatorTest {
         MessageComparator comparator = new MessageComparator();
         ComparisonResult result = comparator.compare(mtFile, pacsFile);
 
-        assertFalse(result.hasDifferences());
+        assertTrue(result.hasDifferences());
+        assertEquals(1, result.getDifferences().size());
+        assertEquals("Intermediary Agent 1 Data Source Scheme", result.getDifferences().get(0).getFieldName());
     }
 }
