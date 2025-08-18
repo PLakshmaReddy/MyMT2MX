@@ -22,27 +22,27 @@ public class HtmlReportGenerator {
 
         body.append("<h1>MT202 vs pacs.009 Comparison Report</h1>");
 
-        Element table = body.append("<table>");
-        Element thead = table.append("<thead>");
-        Element tr = thead.append("<tr>");
+        Element table = body.appendElement("table");
+        Element thead = table.appendElement("thead");
+        Element tr = thead.appendElement("tr");
         tr.append("<th>Transaction Reference</th>");
         tr.append("<th>Field Name</th>");
         tr.append("<th>MT202 Value</th>");
         tr.append("<th>pacs.009 Value</th>");
 
-        Element tbody = table.append("<tbody>");
+        Element tbody = table.appendElement("tbody");
 
         for (ComparisonResult result : results) {
             if (result.hasDifferences()) {
                 for (FieldDifference diff : result.getDifferences()) {
-                    Element row = tbody.append("<tr>");
+                    Element row = tbody.appendElement("tr");
                     row.appendElement("td").text(result.getTransactionReference());
                     row.appendElement("td").text(diff.getFieldName());
                     row.appendElement("td").text(diff.getMtValue());
                     row.appendElement("td").text(diff.getPacsValue());
                 }
             } else {
-                Element row = tbody.append("<tr>");
+                Element row = tbody.appendElement("tr");
                 row.appendElement("td").text(result.getTransactionReference());
                 row.appendElement("td").attr("colspan", "3").text("No differences found");
             }
