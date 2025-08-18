@@ -16,7 +16,7 @@ public class MT202ToPacs009ConverterTest {
                 ":20:REFERENCE\n" +
                 ":21:RELATEDREF\n" +
                 ":32A:240813USD1234,56\n" +
-                ":52A:ORDERINGBANK\n" +
+                ":52A:/12345\nORDERINGBANK\n" +
                 ":53A:SENDERSCORR\n" +
                 ":54A:RECEIVERSCORR\n" +
                 ":56A:INTERMEDIARY\n" +
@@ -25,13 +25,15 @@ public class MT202ToPacs009ConverterTest {
                 ":72:REMITTANCE INFO\n" +
                 "-}{5:{CHK:0123456789AB}}";
 
-        Converter converter = new MT202ToPacs009Converter(new Configuration());
+        MT202ToPacs009Converter converter = new MT202ToPacs009Converter(new Configuration());
+        MT202 mt202 = converter.parseMt202(mt202Message);
         String pacs009Message = converter.convert(mt202Message);
 
         assertNotNull(pacs009Message);
         System.out.println("Generated XML:\n" + pacs009Message);
 
         // Assertions for generated XML
+        assertEquals("12345", mt202.getOrderingInstitution().getAccountNumber());
         assertTrue(pacs009Message.contains("<MsgId>"));
         assertTrue(pacs009Message.contains("<CreDtTm>"));
         assertTrue(pacs009Message.contains("<NbOfTxs>1</NbOfTxs>"));
@@ -63,9 +65,36 @@ public class MT202ToPacs009ConverterTest {
     }
 
     private void assertTag(String xml, String tagName, String expectedValue) {
-        Pattern pattern = Pattern.compile("<" + tagName + "><FinInstnId><BICFI>(.*?)</BICFI></FinInstnId></" + tagName + ">");
+        Pattern pattern = Pattern.compile("<" + tagName + ">.*?<Nm>(.*?)</Nm>.*?</" + tagName + ">");
         Matcher matcher = pattern.matcher(xml.replaceAll("\\s", ""));
+        if (matcher.find()) {
+            assertEquals(expectedValue, matcher.group(1));
+            return;
+        }
+
+        pattern = Pattern.compile("<" + tagName + ">.*?<BICFI>(.*?)</BICFI>.*?</" + tagName + ">");
+        matcher = pattern.matcher(xml.replaceAll("\\s", ""));
         assertTrue("Tag " + tagName + " not found", matcher.find());
         assertEquals(expectedValue, matcher.group(1));
+    }
+
+    @Test
+    public void testConvertWithOptionD() {
+        String mt202Message = "{1:F01BANKDEFMAXXX2034567890}{2:I202BANKUS33XXXXN}{3:{108:MT202}}{4:\n" +
+                ":20:REFERENCE\n" +
+                ":21:RELATEDREF\n" +
+                ":32A:240813USD1234,56\n" +
+                ":52D:ORDERINGBANK\nACCOUNT 12345\n" +
+                ":58D:BENEFICIARYBANK\nACCOUNT 67890\n" +
+                "-}{5:{CHK:0123456789AB}}";
+
+        Converter converter = new MT202ToPacs009Converter(new Configuration());
+        String pacs009Message = converter.convert(mt202Message);
+
+        assertNotNull(pacs009Message);
+        System.out.println("Generated XML:\n" + pacs009Message);
+
+        assertTag(pacs009Message, "InstgAgt", "ORDERINGBANK");
+        assertTag(pacs009Message, "InstdAgt", "BENEFICIARYBANK");
     }
 }

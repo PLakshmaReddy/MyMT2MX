@@ -34,7 +34,7 @@ public class MT202ToPacs009Converter implements Converter {
         return generatePacs009(pacs009);
     }
 
-    private MT202 parseMt202(String mt202Message) {
+    public MT202 parseMt202(String mt202Message) {
         MT202 mt202 = new MT202();
 
         mt202.setTransactionReferenceNumber(getTagValue(mt202Message, "20"));
@@ -68,7 +68,15 @@ public class MT202ToPacs009Converter implements Converter {
         String tagAValue = getTagValue(mt202Message, tag + "A");
         if (tagAValue != null) {
             MT202.Party party = new MT202.Party();
-            party.setBic(tagAValue);
+            if (tagAValue.startsWith("/")) {
+                String[] parts = tagAValue.split("\\n");
+                party.setAccountNumber(parts[0].substring(1));
+                if (parts.length > 1) {
+                    party.setBic(parts[1]);
+                }
+            } else {
+                party.setBic(tagAValue);
+            }
             return party;
         }
 
@@ -215,55 +223,11 @@ public class MT202ToPacs009Converter implements Converter {
             intrBkSttlmDt.appendChild(doc.createTextNode(new SimpleDateFormat("yyyy-MM-dd").format(pacs009.getFinancialInstitutionCreditTransfer().getInterbankSettlementDate())));
             finInstnCdtTrf.appendChild(intrBkSttlmDt);
 
-            if (pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent() != null) {
-                Element instgAgt = doc.createElement("InstgAgt");
-                finInstnCdtTrf.appendChild(instgAgt);
-                Element finInstnId = doc.createElement("FinInstnId");
-                instgAgt.appendChild(finInstnId);
-                Element bicfi = doc.createElement("BICFI");
-                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent().getBic()));
-                finInstnId.appendChild(bicfi);
-            }
-
-            if (pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent() != null) {
-                Element instdAgt = doc.createElement("InstdAgt");
-                finInstnCdtTrf.appendChild(instdAgt);
-                Element finInstnId = doc.createElement("FinInstnId");
-                instdAgt.appendChild(finInstnId);
-                Element bicfi = doc.createElement("BICFI");
-                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent().getBic()));
-                finInstnId.appendChild(bicfi);
-            }
-
-            if (pacs009.getFinancialInstitutionCreditTransfer().getSendersCorrespondent() != null) {
-                Element sndrsCorr = doc.createElement("SndrsCorr");
-                finInstnCdtTrf.appendChild(sndrsCorr);
-                Element finInstnId = doc.createElement("FinInstnId");
-                sndrsCorr.appendChild(finInstnId);
-                Element bicfi = doc.createElement("BICFI");
-                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getSendersCorrespondent().getBic()));
-                finInstnId.appendChild(bicfi);
-            }
-
-            if (pacs009.getFinancialInstitutionCreditTransfer().getReceiversCorrespondent() != null) {
-                Element rcvrsCorr = doc.createElement("RcvrsCorr");
-                finInstnCdtTrf.appendChild(rcvrsCorr);
-                Element finInstnId = doc.createElement("FinInstnId");
-                rcvrsCorr.appendChild(finInstnId);
-                Element bicfi = doc.createElement("BICFI");
-                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getReceiversCorrespondent().getBic()));
-                finInstnId.appendChild(bicfi);
-            }
-
-            if (pacs009.getFinancialInstitutionCreditTransfer().getIntermediary() != null) {
-                Element intrmyAgt1 = doc.createElement("IntrmyAgt1");
-                finInstnCdtTrf.appendChild(intrmyAgt1);
-                Element finInstnId = doc.createElement("FinInstnId");
-                intrmyAgt1.appendChild(finInstnId);
-                Element bicfi = doc.createElement("BICFI");
-                bicfi.appendChild(doc.createTextNode(pacs009.getFinancialInstitutionCreditTransfer().getIntermediary().getBic()));
-                finInstnId.appendChild(bicfi);
-            }
+            generateParty(doc, finInstnCdtTrf, "InstgAgt", pacs009.getFinancialInstitutionCreditTransfer().getInstructingAgent());
+            generateParty(doc, finInstnCdtTrf, "InstdAgt", pacs009.getFinancialInstitutionCreditTransfer().getInstructedAgent());
+            generateParty(doc, finInstnCdtTrf, "SndrsCorr", pacs009.getFinancialInstitutionCreditTransfer().getSendersCorrespondent());
+            generateParty(doc, finInstnCdtTrf, "RcvrsCorr", pacs009.getFinancialInstitutionCreditTransfer().getReceiversCorrespondent());
+            generateParty(doc, finInstnCdtTrf, "IntrmyAgt1", pacs009.getFinancialInstitutionCreditTransfer().getIntermediary());
 
             if (pacs009.getFinancialInstitutionCreditTransfer().getInstructionForNextAgent() != null) {
                 Element instrForNxtAgt = doc.createElement("InstrForNxtAgt");
@@ -292,5 +256,24 @@ public class MT202ToPacs009Converter implements Converter {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void generateParty(Document doc, Element parent, String tagName, Pacs009.Party party) {
+        if (party != null) {
+            Element partyElement = doc.createElement(tagName);
+            parent.appendChild(partyElement);
+            Element finInstnId = doc.createElement("FinInstnId");
+            partyElement.appendChild(finInstnId);
+
+            if (party.getBic() != null) {
+                Element bicfi = doc.createElement("BICFI");
+                bicfi.appendChild(doc.createTextNode(party.getBic()));
+                finInstnId.appendChild(bicfi);
+            } else if (party.getName() != null) {
+                Element nm = doc.createElement("Nm");
+                nm.appendChild(doc.createTextNode(party.getName()));
+                finInstnId.appendChild(nm);
+            }
+        }
     }
 }
