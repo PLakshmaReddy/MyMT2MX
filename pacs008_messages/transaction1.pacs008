@@ -1,0 +1,31 @@
+<Document>
+    <GrpHdr>
+        <MsgId>MSGID-103-1</MsgId>
+        <CreDtTm>2024-08-20T10:00:00</CreDtTm>
+        <NbOfTxs>1</NbOfTxs>
+    </GrpHdr>
+    <CdtTrfTxInf>
+        <PmtId>
+            <InstrId>TXREF-103-1</InstrId>
+            <EndToEndId>E2EREF-103-1</EndToEndId>
+        </PmtId>
+        <IntrBkSttlmAmt Ccy="USD">123.45</IntrBkSttlmAmt>
+        <Dbtr>
+            <Nm>ORDERING CUSTOMER</Nm>
+            <PstlAdr>
+                <AdrLine>123 MAIN ST</AdrLine>
+                <AdrLine>ANYTOWN</AdrLine>
+            </PstlAdr>
+        </Dbtr>
+        <Cdtr>
+            <Nm>BENEFICIARY CUSTOMER</Nm>
+            <PstlAdr>
+                <AdrLine>456 OAK AVE</AdrLine>
+                <AdrLine>ANYCITY</AdrLine>
+            </PstlAdr>
+        </Cdtr>
+        <RmtInf>
+            <Ustrd>INVOICE 123</Ustrd>
+        </RmtInf>
+    </CdtTrfTxInf>
+</Document>
