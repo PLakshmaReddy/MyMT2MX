@@ -39,6 +39,7 @@ class HtmlReportGeneratorTest {
         assertTrue(reportContent.contains("<td>Field1</td>"));
         assertTrue(reportContent.contains("<td>A</td>"));
         assertTrue(reportContent.contains("<td>B</td>"));
+        assertTrue(reportContent.contains("<tr class=\"difference\">"));
         assertTrue(reportContent.contains("<td>TX2</td>"));
         assertTrue(reportContent.contains("<td colspan=\"3\">No differences found</td>"));
     }

@@ -17,6 +17,7 @@ public class HtmlReportGenerator {
                 "table { border-collapse: collapse; width: 100%; }" +
                 "th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }" +
                 "tr:nth-child(even) { background-color: #f2f2f2; }" +
+                ".difference { background-color: #ffdddd; }" +
                 "</style>");
         Element body = doc.body();
 
@@ -35,7 +36,7 @@ public class HtmlReportGenerator {
         for (ComparisonResult result : results) {
             if (result.hasDifferences()) {
                 for (FieldDifference diff : result.getDifferences()) {
-                    Element row = tbody.appendElement("tr");
+                    Element row = tbody.appendElement("tr").addClass("difference");
                     row.appendElement("td").text(result.getTransactionReference());
                     row.appendElement("td").text(diff.getFieldName());
                     row.appendElement("td").text(diff.getMtValue());
