@@ -23,6 +23,7 @@ public class ComparatorMain {
         }
 
         List<ComparisonResult> results = new ArrayList<>();
+        int totalCompared = 0;
 
         if ("mt202".equalsIgnoreCase(messageType)) {
             MessageComparator comparator = new MessageComparator();
@@ -33,6 +34,7 @@ public class ComparatorMain {
                     File pacsFile = new File(pacsFolder, baseName + ".pacs009");
                     if (pacsFile.exists()) {
                         results.add(comparator.compare(mtFile, pacsFile));
+                        totalCompared++;
                     }
                 }
             }
@@ -45,6 +47,7 @@ public class ComparatorMain {
                     File pacsFile = new File(pacsFolder, baseName + ".pacs008");
                     if (pacsFile.exists()) {
                         results.add(comparator.compare(mtFile, pacsFile));
+                        totalCompared++;
                     }
                 }
             }
@@ -53,8 +56,10 @@ public class ComparatorMain {
             System.exit(1);
         }
 
+        long withDifferences = results.stream().filter(ComparisonResult::hasDifferences).count();
+
         HtmlReportGenerator reportGenerator = new HtmlReportGenerator();
-        reportGenerator.generateReport(results, "comparison_report.html");
+        reportGenerator.generateReport(results, "comparison_report.html", totalCompared, withDifferences);
 
         System.out.println("Comparison report generated: comparison_report.html");
     }
